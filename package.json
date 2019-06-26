@@ -1,0 +1,9 @@
+{
+  "name": "faas-lib-exploration",
+  "version": "0.1.0",
+  "main": "index.js",
+  "repository": "https://github.com/mfeineis/faas-lib-exploration",
+  "author": "Martin Feineis <mfeineis@users.noreply.github.com>",
+  "license": "BSD-3-Clause",
+  "private": true
+}
