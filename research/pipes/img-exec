@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# it is expected that the caller will pass in --entrypoint and an image name followed by any additional arguments
+
+# args explained:
+# -w:                make relative paths work
+# --volume (/tmp/):  make /tmp/... paths work
+# --volume ($HOME/): make ~/... paths work
+# --net:             no need for separate net namespace
+# --rm:              no need to keep this container
+# --tty:             necessary for colors to work
+# --interactive:     necessary for vi to work
+# --attach           necessary for piping to work
+
+if [[ -t 0 ]]; then
+    arg_tty="--tty"
+else
+    arg_attach="--attach stdin --attach stdout --attach stderr"
+fi
+
+exec docker run -w="$(pwd)" --volume=/tmp/:/tmp/ --volume=$HOME/:$HOME/ --net=host --rm --interactive ${arg_tty-} ${arg_attach-} "${@}"
