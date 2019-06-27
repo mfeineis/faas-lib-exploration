@@ -12,38 +12,33 @@
     function fn() {}
 
     fn.pipe = function pipe(middlewares) {
-
-        function decorate(fn) {
-            return fn;
-            //return function decorated() {
-            //    console.log("decorate", fn);
-            //    return fn.apply(this, arguments);
-            //};
-        }
+        const ms = middlewares.slice();
+        ms.reverse();
+        //console.log("ms", ms);
 
         return function pipeline(ctx, done, stdout, stdin, stderr) {
             let lastCtx = ctx;
 
-            const ms = middlewares.slice();
-            ms.reverse();
-            console.log("ms", ms);
-
             ms.reduce(function (next, current) {
-                return decorate(function step(err, newCtx) {
-                    if (err) {
-                        console.error(err);
-                    }
+                return function step(err, newCtx) {
                     lastCtx = newCtx || lastCtx || ctx;
+                    if (err instanceof Error) {
+                        stderr.write(err.message);
+                        done(lastCtx, null, stdout, stdin, stderr);
+                        return;
+                    }
                     // console.log("step1.lastCtx", lastCtx);
                     current(lastCtx, next, stdout, stdin, stderr);
-                });
-            }, decorate(function lastStep(err, newCtx) {
-                if (err) {
-                    console.error(err);
-                }
+                };
+            }, function tail(err, newCtx) {
                 lastCtx = newCtx || lastCtx || ctx;
+                if (err instanceof Error) {
+                    stderr.write(err.message);
+                    done(lastCtx, null, stdout, stdin, stderr);
+                    return;
+                }
                 done(lastCtx, null, stdout, stdin, stderr);
-            }))(lastCtx, null, stdout, stdin, stderr);
+            })(lastCtx, null, stdout, stdin, stderr);
         };
     };
 

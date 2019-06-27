@@ -2,7 +2,7 @@ const fn = require("./fn.js");
 
 // Custom Library Shell
 
-function extract(ctx, next, stdout, stdin) {
+function extract(ctx, next, stdout, stdin, stderr) {
     // console.log("extract", ctx); //, next, stdout, stdin);
     next(null, {
         headers: {},
@@ -10,7 +10,7 @@ function extract(ctx, next, stdout, stdin) {
     });
 }
 
-function collapse(ctx, next, stdout, stdin) {
+function collapse(ctx, next, stdout, stdin, stderr) {
     // console.log("collapse", ctx); //, next, stdout, stdin);
     next();
 }
@@ -24,18 +24,8 @@ function wait(ctx, next) {
     setTimeout(next, 1000);
 }
 
-function servlet(pipeline) {
-    // console.log("servlet", pipeline, extract, collapse);
-    return fn.pipe([
-        extract,
-        wait,
-        pipeline,
-        fail,
-        collapse,
-    ]);
-}
-
 module.exports = {
-    handler: servlet,
+    collapse: collapse,
+    extract: extract,
 };
 
