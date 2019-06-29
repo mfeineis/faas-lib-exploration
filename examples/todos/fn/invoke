@@ -1,0 +1,23 @@
+#!/usr/bin/env node
+
+const handlers = require("../index.js");
+const config = require("../fn.json");
+const { configureMain, trace } = require("../../helloworld/fn/lib/main.js");
+
+const req = Object.create(process.stdin);
+req.url = process.argv[2] || "/";
+
+const main = configureMain(handlers, config);
+main(req, {
+    end: function end(chunk) {
+        trace("[invoke.end]", chunk);
+        process.stdout.end(chunk);
+    },
+    write: function write(chunk) {
+        trace("[invoke.write]", chunk);
+        process.stdout.write(chunk);
+    },
+    writeHead: function writeHead(status, headers) {
+        trace("[invoke.writeHead]", status, headers);
+    },
+});

@@ -1,0 +1,12 @@
+{
+    "todos": {
+        "before": [
+            "extractBody",
+            "bodyAsJson",
+            ["loggingMiddleware", "before"]
+        ],
+        "after": [
+            ["loggingMiddleware", "after"]
+        ]
+    }
+}

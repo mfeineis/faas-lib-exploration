@@ -1,0 +1,18 @@
+#!/usr/bin/env node
+
+const http = require("http");
+
+const handlers = require("../index.js");
+const config = require("../fn.json");
+const { configureMain, trace } = require("../../helloworld/fn/lib/main.js");
+
+const server = http.createServer(configureMain(handlers, config));
+server.on('error', function (err, socket) {
+    trace(err);
+    socket.end('HTTP/1.1 500 Server Error\r\n\r\n');
+});
+server.on('clientError', function (err, socket) {
+    socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
+});
+server.listen(5000);
+
