@@ -53,7 +53,6 @@ function main(req, res) {
         },
     };
 
-
     function sentinel(ctx, next, stdout, stdin, stderr) {
         if (stderr._buffer.length) {
             // console.log("ctx", ctx, "\nstderr\n", stderr._buffer.join("")); //, next, stdout, stdin);

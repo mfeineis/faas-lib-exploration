@@ -10,28 +10,18 @@ trace = console.log;
 // Custom Library Shell
 
 function extractBody(ctx, next, stdout, stdin, stderr) {
-    // console.log("extract", ctx); //, next, stdout, stdin);
-
     stdin.setEncoding("utf-8");
 
     const lines = [];
-
-    //const reader = readline.createInterface({
-    //    input: stdin,
-    //    // input: fs.createReadStream('sample.txt'),
-    //    // crlfDelay: Infinity
-    //});
-    const reader = stdin;
-    //console.log("reader", typeof reader);
-
     let failed = false;
-    reader.on("error", function (err) {
+
+    stdin.on("error", function (err) {
         trace("reader.error", err);
         failed = true;
         next(new Error(err));
     });
 
-    reader.on("end", function (line) {
+    stdin.on("end", function (line) {
         if (failed) return;
 
         if (line) {
@@ -39,7 +29,6 @@ function extractBody(ctx, next, stdout, stdin, stderr) {
             lines.push(line);
         }
         const isStringBody = typeof lines[0] === "string";
-        //const body = lines.join("\n");
         const body = isStringBody
             ? lines.join("\n")
             : Buffer.concat(lines).toString();
@@ -53,13 +42,12 @@ function extractBody(ctx, next, stdout, stdin, stderr) {
         next(null, ctx);
     });
 
-    reader.on("data"/*"data"*/, function (line) {
+    stdin.on("data"/*"data"*/, function (line) {
         if (failed) return;
 
         trace(`Line from stdin: ${line}`);
         lines.push(line);
     });
-
 }
 
 function bodyAsJson(ctx, next) {
