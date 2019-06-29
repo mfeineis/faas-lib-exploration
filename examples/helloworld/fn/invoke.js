@@ -1,26 +1,15 @@
 "use strict";
 
-const fn = require("./fn.js");
-const { handler: servlet } = require("./lib.js");
-const { handler } = require("../index.js");
-const { factory: log } = require("./loggingMiddleware.js");
+const main = require("./main.js");
 
-const pipeline = servlet(fn.pipe([
-    log("before"),
-    handler,
-    log("after"),
-]));
-
-const stdout = {
-    _buffer: [],
-    write: function write(chunk) {
-        this._buffer.push(chunk);
+main(process.stdin, {
+    end: function end(chunk) {
+        console.log("[invoke.end]", chunk);
     },
-};
-
-function sentinel(ctx, next, stdout, stdin, stderr) {
-    console.log("ctx", ctx, "\nstdout\n", stdout._buffer.join("")); //, next, stdout, stdin);
-}
-
-pipeline({ ctx: true }, sentinel, stdout, null, null);
-
+    write: function write(chunk) {
+        console.log("[invoke.write]", chunk);
+    },
+    writeHead: function writeHead(status, headers) {
+        console.log("[invoke.writeHead]", status, headers);
+    },
+});

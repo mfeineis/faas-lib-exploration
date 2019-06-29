@@ -1,5 +1,5 @@
 
-function sayHello(ctx, next, stdout, stdin) {
+function sayHelloOrNot(ctx, next, stdout, stdin) {
     ctx.headers["Content-Type"] = "text/plain";
     stdout.write("Hello, World!");
 
@@ -8,6 +8,13 @@ function sayHello(ctx, next, stdout, stdin) {
     } else {
         next(new Error("Random Failure!"));
     }
+}
+
+function sayHello(ctx, next, stdout, stdin) {
+    ctx.headers["Content-Type"] = "text/plain";
+    const who = ctx.body.who || "World";
+    stdout.write("Hello, " + who + "!");
+    next();
 }
 
 module.exports = {
