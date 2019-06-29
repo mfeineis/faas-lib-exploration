@@ -1,9 +1,12 @@
 #!/usr/bin/env node
 
-const { main, trace } = require("./lib/main.js");
+const handlers = require("../index.js");
+const { configureMain, trace } = require("./lib/main.js");
 
 const req = Object.create(process.stdin);
 req.url = process.argv[2] || "/";
+
+const main = configureMain(handlers, {});
 
 main(req, {
     end: function end(chunk) {
