@@ -8,7 +8,7 @@ req.url = process.argv[2] || "/";
 main(req, {
     end: function end(chunk) {
         trace("[invoke.end]", chunk);
-        process.stdout.write(chunk);
+        process.stdout.end(chunk);
     },
     write: function write(chunk) {
         trace("[invoke.write]", chunk);
