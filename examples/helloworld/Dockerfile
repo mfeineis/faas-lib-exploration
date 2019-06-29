@@ -4,5 +4,5 @@ WORKDIR /usr/app
 
 COPY . .
 
-ENTRYPOINT [ "node", "/usr/app/fn/endpoint.js" ]
+ENTRYPOINT [ "/usr/app/fn/serve" ]
 

@@ -1,6 +1,5 @@
-const fn = require("./fn.js");
 const { bodyAsJson, collapse, extractBody, utils } = require("./lib.js");
-const handlers = require("../index.js");
+const handlers = require("../../index.js");
 const { factory: log } = require("./loggingMiddleware.js");
 
 const { trace } = utils;
@@ -73,5 +72,8 @@ function main(req, res) {
     selectEndpoint(utils.extractRoute(req))({}, sentinel, stdout, req, stderr);
 }
 
-module.exports = main;
+module.exports = {
+    main: main,
+    trace: trace,
+};
 

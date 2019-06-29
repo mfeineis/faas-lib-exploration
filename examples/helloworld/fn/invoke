@@ -1,0 +1,20 @@
+#!/usr/bin/env node
+
+const { main, trace } = require("./lib/main.js");
+
+const req = Object.create(process.stdin);
+req.url = process.argv[2] || "/";
+
+main(req, {
+    end: function end(chunk) {
+        trace("[invoke.end]", chunk);
+        process.stdout.write(chunk);
+    },
+    write: function write(chunk) {
+        trace("[invoke.write]", chunk);
+        process.stdout.write(chunk);
+    },
+    writeHead: function writeHead(status, headers) {
+        trace("[invoke.writeHead]", status, headers);
+    },
+});

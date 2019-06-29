@@ -1,11 +1,11 @@
-"use strict";
+#!/usr/bin/env node
 
 const http = require("http");
-const main = require("./main.js");
+const { main, trace } = require("./lib/main.js");
 
 const server = http.createServer(main);
 server.on('error', function (err, socket) {
-    console.error(err);
+    trace(err);
     socket.end('HTTP/1.1 500 Server Error\r\n\r\n');
 });
 server.on('clientError', function (err, socket) {
