@@ -7,6 +7,13 @@ let trace = function () {};
 
 // Custom Library Shell
 
+function initialize(ctx, next, stdout, stdin, stderr) {
+    ctx.headers = {};
+    ctx.log = [];
+
+    next(null, ctx);
+}
+
 function extractBody(ctx, next, stdout, stdin, stderr) {
     stdin.setEncoding("utf-8");
 
@@ -34,8 +41,6 @@ function extractBody(ctx, next, stdout, stdin, stderr) {
         trace("isStringBody", isStringBody, "stdin:", body);
 
         ctx.body = body;
-        ctx.headers = {};
-        ctx.log = [];
         ctx.originalBody = body;
         next(null, ctx);
     });
@@ -122,6 +127,7 @@ module.exports = {
     bodyAsJson: bodyAsJson,
     collapse: collapse,
     extractBody: extractBody,
+    initialize,
     utils: {
         extractRoute: extractRoute,
         normalizeEndpointName: normalizeEndpointName,
