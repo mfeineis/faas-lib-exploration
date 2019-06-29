@@ -8,7 +8,7 @@ const { trace } = utils;
 const endpointsByName = {};
 const endpoints = [];
 Object.keys(handlers).forEach(function (name) {
-    const endpoint = fn.pipe([
+    const endpoint = utils.pipe([
         extractBody,
         bodyAsJson,
         log("before"),

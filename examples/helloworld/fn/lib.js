@@ -2,10 +2,8 @@ const fs = require("fs");
 const readline = require("readline");
 const url = require("url");
 
-const fn = require("./fn.js");
-
 let trace = function () {};
-trace = console.log;
+//trace = console.log;
 
 // Custom Library Shell
 
@@ -89,6 +87,37 @@ function normalizeEndpointName(name) {
     });
 }
 
+function pipe(middlewares) {
+    const ms = middlewares.slice();
+    ms.reverse();
+    //console.log("ms", ms);
+
+    return function pipeline(ctx, done, stdout, stdin, stderr) {
+        let lastCtx = ctx;
+
+        ms.reduce(function (next, current) {
+            return function step(err, newCtx) {
+                lastCtx = newCtx || lastCtx || ctx;
+                if (err instanceof Error) {
+                    stderr.write(err.message);
+                    done(lastCtx, null, stdout, stdin, stderr);
+                    return;
+                }
+                // console.log("step1.lastCtx", lastCtx);
+                current(lastCtx, next, stdout, stdin, stderr);
+            };
+        }, function tail(err, newCtx) {
+            lastCtx = newCtx || lastCtx || ctx;
+            if (err instanceof Error) {
+                stderr.write(err.message);
+                done(lastCtx, null, stdout, stdin, stderr);
+                return;
+            }
+            done(lastCtx, null, stdout, stdin, stderr);
+        })(lastCtx, null, stdout, stdin, stderr);
+    };
+};
+
 module.exports = {
     bodyAsJson: bodyAsJson,
     collapse: collapse,
@@ -96,6 +125,7 @@ module.exports = {
     utils: {
         extractRoute: extractRoute,
         normalizeEndpointName: normalizeEndpointName,
+        pipe: pipe,
         trace: trace,
     },
 };
