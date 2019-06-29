@@ -1,16 +1,41 @@
 const fn = require("./fn.js");
-const { bodyAsJson, collapse, extractBody } = require("./lib.js");
-const { handler } = require("../index.js");
+const { bodyAsJson, collapse, extractBody, utils } = require("./lib.js");
+const handlers = require("../index.js");
 const { factory: log } = require("./loggingMiddleware.js");
 
-const servlet = fn.pipe([
-    extractBody,
-    bodyAsJson,
-    log("before"),
-    handler,
-    log("after"),
-    collapse,
-]);
+const { trace } = utils;
+
+const endpointsByName = {};
+const endpoints = [];
+Object.keys(handlers).forEach(function (name) {
+    const endpoint = fn.pipe([
+        extractBody,
+        bodyAsJson,
+        log("before"),
+        handlers[name],
+        log("after"),
+        collapse,
+    ]);
+    endpointsByName[utils.normalizeEndpointName(name)] = endpoint;
+    endpoints.push(endpoint);
+});
+
+trace("Endpoints detected", endpointsByName);
+
+function selectEndpoint(route) {
+    trace("selectEndpoint", "Route: ", route);
+
+    const pathname = utils.normalizeEndpointName(route.pathname);
+    if (pathname in endpointsByName) {
+        trace("  selected specific endpoint", pathname);
+        return endpointsByName[pathname];
+    }
+
+    // FIXME: Actually select the default endpoint based on some convention
+    const defaultEndpoint = endpoints[0];
+    trace("  selected default endpoint", defaultEndpoint);
+    return defaultEndpoint;
+}
 
 function main(req, res) {
 
@@ -46,8 +71,7 @@ function main(req, res) {
         res.end(stdout._buffer.join(""));
     }
 
-    servlet({}, sentinel, stdout, req, stderr);
-
+    selectEndpoint(utils.extractRoute(req))({}, sentinel, stdout, req, stderr);
 }
 
 module.exports = main;

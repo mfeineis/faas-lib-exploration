@@ -1,7 +1,7 @@
 
 function sayHelloOrNot(ctx, next, stdout, stdin) {
     ctx.headers["Content-Type"] = "text/plain";
-    stdout.write("Hello, World!");
+    stdout.write("Hello, World... or not!");
 
     if (Math.random() >= 0.5) {
         next();
@@ -18,7 +18,8 @@ function sayHello(ctx, next, stdout, stdin) {
 }
 
 module.exports = {
-    handler: sayHello,
+    sayHello: sayHello,
+    sayHelloOrNot: sayHelloOrNot,
 };
 
 

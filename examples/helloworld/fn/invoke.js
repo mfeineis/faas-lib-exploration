@@ -2,7 +2,10 @@
 
 const main = require("./main.js");
 
-main(process.stdin, {
+const req = Object.create(process.stdin);
+req.url = process.argv[2] || "/";
+
+main(req, {
     end: function end(chunk) {
         console.log("[invoke.end]", chunk);
     },
