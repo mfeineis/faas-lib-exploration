@@ -59,6 +59,51 @@ function configureMain(handlers, config) {
         return defaultEndpoint;
     }
 
+    function invoke(id, options, cb) {
+        const name = utils.normalizeEndpointName(id);
+        trace("invoke(", id, options, cb, ") ->", name);
+
+        const stdout = {
+            _buffer: [],
+            write: function write(chunk) {
+                stdout._buffer.push(chunk);
+            },
+        };
+
+        const stderr = {
+            _buffer: [],
+            write: function write(chunk) {
+                stderr._buffer.push(chunk);
+            },
+        };
+
+        const stdin = {
+            on: function on(evt, pump) {
+                if (evt === "end") {
+                    pump(JSON.stringify(options));
+                }
+            },
+            setEncoding: function noop() {},
+        };
+
+        function respond() {
+            if (stderr._buffer.length) {
+                // console.log("ctx", ctx, "\nstderr\n", stderr._buffer.join("")); //, next, stdout, stdin);
+                cb(new Error(stderr._buffer.join("")));
+                return;
+            }
+            cb(null, stdout._buffer.join(""));
+        }
+
+        endpointsByName[name](createContext(), respond, stdout, stdin, stderr);
+    }
+
+    function createContext() {
+        return {
+            invoke: invoke,
+        };
+    }
+
     return function main(req, res) {
 
         const stdout = {
@@ -75,7 +120,7 @@ function configureMain(handlers, config) {
             },
         };
 
-        function sentinel(ctx, next, stdout, stdin, stderr) {
+        function respond(ctx, next, stdout, stdin, stderr) {
             if (stderr._buffer.length) {
                 // console.log("ctx", ctx, "\nstderr\n", stderr._buffer.join("")); //, next, stdout, stdin);
                 // TODO: Use problem.json?
@@ -92,7 +137,8 @@ function configureMain(handlers, config) {
             res.end(stdout._buffer.join(""));
         }
 
-        selectEndpoint(utils.extractRoute(req))({}, sentinel, stdout, req, stderr);
+        const ctx = createContext();
+        selectEndpoint(utils.extractRoute(req))(ctx, respond, stdout, req, stderr);
     };
 }
 
